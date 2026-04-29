@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef , useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 type ChatMessage = {
   role: "user" | "ai";
@@ -11,21 +11,16 @@ export default function Home() {
   const [message, setMessage] = useState("");
   const [chat, setChat] = useState<ChatMessage[]>([]);
   const [loading, setLoading] = useState(false);
+
   const recognitionRef = useRef<any>(null);
-  
+
   useEffect(() => {
     const saved = localStorage.getItem("nexus-chat");
-
-    if (saved) {
-      setChat(JSON.parse(saved));
-    }
+    if (saved) setChat(JSON.parse(saved));
   }, []);
 
   useEffect(() => {
-    localStorage.setItem(
-      "nexus-chat",
-      JSON.stringify(chat)
-    );
+    localStorage.setItem("nexus-chat", JSON.stringify(chat));
   }, [chat]);
 
   const askAI = async (text: string) => {
@@ -47,7 +42,7 @@ export default function Home() {
     } catch {
       setChat((prev) => [
         ...prev,
-        { role: "ai", text: "Something went wrong." }
+        { role: "ai", text: "Error getting response." }
       ]);
     }
   };
@@ -69,33 +64,29 @@ export default function Home() {
 
     setLoading(false);
   };
-   const startVoice = () => {
-  const SpeechRecognition =
-    window.SpeechRecognition ||
-    (window as any).webkitSpeechRecognition;
 
-  if (!SpeechRecognition) {
-    alert("Voice not supported");
-    return;
-  }
+  const startVoice = () => {
+    const SpeechRecognition =
+      (window as any).SpeechRecognition ||
+      (window as any).webkitSpeechRecognition;
 
-  const recognition = new SpeechRecognition();
+    if (!SpeechRecognition) {
+      alert("Voice not supported");
+      return;
+    }
 
-  recognition.lang = "en-US";
-  recognition.start();
+    const recognition = new SpeechRecognition();
 
-  recognition.onresult = (event: any) => {
-    const text = event.results[0][0].transcript;
-    setMessage(text);
+    recognition.lang = "en-US";
+    recognition.start();
+
+    recognition.onresult = (event: any) => {
+      setMessage(event.results[0][0].transcript);
+    };
+
+    recognitionRef.current = recognition;
   };
 
-  recognitionRef.current = recognition;
-};
-
-const clearChat = () => {
-  setChat([]);
-  localStorage.removeItem("nexus-chat");
-};
   const clearChat = () => {
     setChat([]);
     localStorage.removeItem("nexus-chat");
@@ -122,10 +113,7 @@ const clearChat = () => {
       <aside className="sidebar">
         <div className="logo">Nexus</div>
 
-        <button
-          className="new-chat-btn"
-          onClick={clearChat}
-        >
+        <button className="new-chat-btn" onClick={clearChat}>
           + New Chat
         </button>
 
@@ -141,10 +129,7 @@ const clearChat = () => {
             <span>Smart Assistant</span>
           </div>
 
-          <button
-            className="mini-btn"
-            onClick={regenerate}
-          >
+          <button className="mini-btn" onClick={regenerate}>
             Regenerate
           </button>
         </header>
@@ -173,9 +158,7 @@ const clearChat = () => {
           ))}
 
           {loading && (
-            <div className="bubble ai">
-              Thinking...
-            </div>
+            <div className="bubble ai">Thinking...</div>
           )}
         </div>
 
@@ -184,20 +167,14 @@ const clearChat = () => {
             type="text"
             placeholder="Message Nexus..."
             value={message}
-            onChange={(e) =>
-              setMessage(e.target.value)
-            }
+            onChange={(e) => setMessage(e.target.value)}
             onKeyDown={(e) =>
               e.key === "Enter" && sendMessage()
             }
           />
-           <button onClick={startVoice}>
-           🎤
-           </button>
 
-          <button onClick={sendMessage}>
-            Send
-          </button>
+          <button onClick={startVoice}>🎤</button>
+          <button onClick={sendMessage}>Send</button>
         </div>
       </section>
     </main>
